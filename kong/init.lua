@@ -743,6 +743,8 @@ function Kong.header_filter()
 
   runloop.header_filter.before(ctx)
 
+  ctx.delay_response = true
+
   for plugin, plugin_conf in plugins_iterator(ctx, loaded_plugins,
                                               configured_plugins) do
     kong_global.set_named_ctx(kong, "plugin", plugin_conf)
@@ -752,6 +754,12 @@ function Kong.header_filter()
 
     kong_global.reset_log(kong)
   end
+
+  if ctx.delayed_response then
+    return responses.flush_delayed_response(ctx)
+  end
+
+  ctx.delay_response = false
 
   runloop.header_filter.after(ctx)
 end
